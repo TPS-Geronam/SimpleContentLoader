@@ -2,7 +2,7 @@
 
 A simple implementation of a data-driven content loading system for Unity3D. A ConfigLoader discovers content configurations and content loaders as ScriptableObjects based on Addressable labels. It then tries to match the specified labels within the configs to the labels of the loaders.
 
-**Note:** AsyncOperationHandles of the loader and config SOs are kept until either Unload(), or the next Load() is called.
+**Note:** AsyncOperationHandles of the loader SOs and config SOs are kept until either Unload(), or the next Load() is called.
 
 Last tested on Unity 6.3
 
