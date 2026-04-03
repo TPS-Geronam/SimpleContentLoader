@@ -5,6 +5,11 @@ A simple implementation of a data-driven content loading system for Unity3D. A C
 **Note:** AsyncOperationHandles of the loader and config SOs are kept until either Unload(), or the next Load() is called.
 
 Last tested on Unity 6.3
+
+<img width="422" height="252" alt="scl" src="https://github.com/user-attachments/assets/203a62fe-4eb8-48e1-8f0c-531eb37d9f55" />
+
+[drawio](https://github.com/TPS-Geronam/SimpleContentLoader/blob/main/scl.drawio)
+
 ## Dependencies
 - [UniTask](https://docs.unity3d.com/Packages/com.unity.addressables@2.10/manual/index.html)
 - [Addressables](https://docs.unity3d.com/Packages/com.unity.addressables@2.10/manual/index.html)
