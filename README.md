@@ -11,7 +11,7 @@ Last tested on Unity 6.3
 [drawio](https://github.com/TPS-Geronam/SimpleContentLoader/blob/main/scl.drawio)
 
 ## Dependencies
-- [UniTask](https://docs.unity3d.com/Packages/com.unity.addressables@2.10/manual/index.html)
+- [UniTask](https://github.com/cysharp/UniTask)
 - [Addressables](https://docs.unity3d.com/Packages/com.unity.addressables@2.10/manual/index.html)
 
 ## Usage
