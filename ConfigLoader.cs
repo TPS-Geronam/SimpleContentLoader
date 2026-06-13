@@ -50,7 +50,7 @@ namespace SimpleContentLoader
             await LoadConfigs();
 
             if (loadContentAfterConfigsLoaded)
-                foreach (var config in this.configs)
+                foreach (var config in this.configs.OrderBy(c => c.Key))
                     LoadContentOfConfig(config.Value);
         }
 
@@ -121,9 +121,9 @@ namespace SimpleContentLoader
                 return false;
 
             var loaderContentLabels = contentLoader.GetContentLabels();
-            bool loaderContainsLabels = loaderContentLabels.All(label => configLabels.Contains(label));
-            bool loaderContainsExactCountLabels = !config.ExactLoaderMatch || loaderContentLabels.Count == configLabels.Count;
-            return loaderContainsLabels && loaderContainsExactCountLabels;
+            bool loaderContainsConfigLabels = configLabels.All(loaderContentLabels.Contains);
+            bool loaderContainsExactLabelCount = !config.ExactLoaderMatch || loaderContentLabels.Count == configLabels.Count;
+            return loaderContainsConfigLabels && loaderContainsExactLabelCount;
         }
 
         void Unload(UnloadTarget configsOrLoader = UnloadTarget.Both)
