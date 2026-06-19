@@ -48,10 +48,25 @@ namespace SimpleContentLoader
         {
             await LoadLoaders();
             await LoadConfigs();
+            if (loadContentAfterConfigsLoaded) LoadContent();
+        }
 
-            if (loadContentAfterConfigsLoaded)
-                foreach (var config in this.configs.OrderBy(c => c.Key))
-                    LoadContentOfConfig(config.Value);
+        public void LoadContent()
+        {
+            foreach (var config in configs)
+                _ = LoadContentOfConfig(config.Value);
+        }
+
+        public async UniTask LoadContentOfConfig(Config config)
+        {
+            var matchedLoader = contentLoaders.FirstOrDefault(
+                pair => LoaderMatchesConfigLabels(pair.Key, pair.Value, config)
+            );
+            var loader = matchedLoader.Value;
+            if (loader != null)
+                await loader.Load(config);
+            else
+                throw new Exception("Config loader could not match a content loader");
         }
 
         public async UniTask LoadLoaders()
@@ -63,7 +78,9 @@ namespace SimpleContentLoader
             var loaderHandles = await LoadAssets<IContentLoader>(loaderLocations);
             var loaders = loaderHandles.Result;
 
-            contentLoaders = loaders.ToDictionary(loader => loader.GetLoaderId(), loader => loader);
+            contentLoaders = loaders
+                .OrderBy(loader => loader.GetLoaderId())
+                .ToDictionary(loader => loader.GetLoaderId(), loader => loader);
         }
 
         public async UniTask LoadConfigs()
@@ -75,7 +92,9 @@ namespace SimpleContentLoader
             var configHandles = await LoadAssets<Config>(configLocations);
             var configs = configHandles.Result;
 
-            this.configs = configs.ToDictionary(config => config.ConfigId, config => config);
+            this.configs = configs
+                .OrderBy(config => config.ConfigId)
+                .ToDictionary(config => config.ConfigId, config => config);
         }
 
         async UniTask<AsyncOperationHandle<IList<IResourceLocation>>> LoadLocations(List<string> keys, Addressables.MergeMode mergeMode, Type type)
@@ -100,18 +119,6 @@ namespace SimpleContentLoader
             throw new Exception("Config loader could not load assets");
         }
 
-        void LoadContentOfConfig(Config config)
-        {
-            var matchedLoader = contentLoaders.FirstOrDefault(
-                pair => LoaderMatchesConfigLabels(pair.Key, pair.Value, config)
-            );
-            var loader = matchedLoader.Value;
-            if (loader != null)
-                _ = loader.Load(config);
-            else
-                throw new Exception("Config loader could not match a content loader");
-        }
-
         bool LoaderMatchesConfigLabels(string loaderId, IContentLoader contentLoader, Config config)
         {
             var configLabels = config.ContentLabels;
@@ -126,7 +133,7 @@ namespace SimpleContentLoader
             return loaderContainsConfigLabels && loaderContainsExactLabelCount;
         }
 
-        void Unload(UnloadTarget configsOrLoader = UnloadTarget.Both)
+        public void Unload(UnloadTarget configsOrLoader = UnloadTarget.Both)
         {
             bool unloadLoaders = configsOrLoader == UnloadTarget.Loader;
             bool unloadConfigs = configsOrLoader == UnloadTarget.Configs;
@@ -148,7 +155,7 @@ namespace SimpleContentLoader
             }
         }
 
-        enum UnloadTarget
+        public enum UnloadTarget
         {
             Loader,
             Configs,
