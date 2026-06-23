@@ -13,7 +13,7 @@ namespace SimpleContentLoader
     {
         [Header("Content Loaders")]
         [SerializeField, Tooltip("All instantiated content loaders.")]
-        Dictionary<string, IContentLoader> contentLoaders = new();
+        Dictionary<string, IContentLoader> contentLoaders;
 
         [SerializeField, Tooltip("Keys for loading content loaders.")]
         List<string> loaderLabels = new() { "contentLoader" };
@@ -23,7 +23,7 @@ namespace SimpleContentLoader
 
         [Header("Configs")]
         [SerializeField, Tooltip("All loaded content configs.")]
-        Dictionary<string, Config> configs = new();
+        Dictionary<string, Config> configs;
 
         [SerializeField, Tooltip("Keys for loading config locations.")]
         List<string> configLabels = new() { "contentConfig" };
@@ -31,8 +31,8 @@ namespace SimpleContentLoader
         [SerializeField, Tooltip("Merge mode for loading config locations.")]
         Addressables.MergeMode configMergeMode = Addressables.MergeMode.Union;
 
-        [SerializeField, Tooltip("Whether to immediately try to start dispatching configs to content loaders.")]
-        bool loadContentAfterConfigsLoaded = true;
+        [SerializeField, Tooltip("Whether to try to start dispatching configs to content loaders in Start().")]
+        bool loadContentOnStart = true;
 
         AsyncOperationHandle<IList<IResourceLocation>> _loaderLocationHandles;
         AsyncOperationHandle<IList<IResourceLocation>> _configLocationHandles;
@@ -44,15 +44,23 @@ namespace SimpleContentLoader
             _ = Initialize();
         }
 
+        void Start()
+        {
+            if (loadContentOnStart)
+                _ = LoadContent();
+        }
+
         async UniTask Initialize()
         {
             await LoadLoaders();
             await LoadConfigs();
-            if (loadContentAfterConfigsLoaded) LoadContent();
         }
 
-        public void LoadContent()
+        public async UniTask LoadContent()
         {
+            while (configs == null)
+                await UniTask.NextFrame();
+
             foreach (var config in configs)
                 _ = LoadContentOfConfig(config.Value);
         }
